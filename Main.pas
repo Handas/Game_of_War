@@ -1,0 +1,212 @@
+unit Main;
+
+interface
+
+uses
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ExtCtrls, Vcl.StdCtrls, uPixel;
+
+type
+  TForm1 = class(TForm)
+    pSite: TPanel;
+    Button1: TButton;
+    Button2: TButton;
+    timer: TTimer;
+    lStat: TPanel;
+    Label2: TLabel;
+    Edit2: TEdit;
+    Button3: TButton;
+    Button4: TButton;
+    procedure FormShow(Sender: TObject);
+    procedure FormCreate(Sender: TObject);
+    procedure Button1Click(Sender: TObject);
+    procedure Button1KeyDown(Sender: TObject; var Key: Word;
+      Shift: TShiftState);
+    procedure timerTimer(Sender: TObject);
+    procedure Button2Click(Sender: TObject);
+    procedure Edit2KeyPress(Sender: TObject; var Key: Char);
+    procedure Button3Click(Sender: TObject);
+    procedure Button4Click(Sender: TObject);
+  private
+    { Private-Deklarationen }
+    procedure Create_Matrix();
+    procedure Clean();
+    procedure Algo(farbe:String; pos:integer);
+  public
+    { Public-Deklarationen }
+  end;
+
+var
+  Form1: TForm1;
+  anz_led : integer;
+  wahrscheinlichkeit : integer;
+  aAlter : Array[1..10000] of integer;
+  aSoll : Array[1..10000] of integer;
+  fGrün:TPixel;
+  fBlau:TPixel;
+
+implementation
+
+{$R *.dfm}
+
+procedure TForm1.Clean();
+var
+  an_aus, i, j, proz_anz : integer;
+begin
+  //Grau Färbung
+  for i := 1 to 64 do
+  begin
+    for j := 1 to 124 do
+    begin
+      TPanel(FindComponent('PanelZ'+IntToStr(i)+'S'+IntToStr(j))).Color := RGB(255, 255, 255);
+    end;
+  end;
+
+  fGrün := TPixel.Create('Grün','Z'+IntToStr(Random(64))+'S'+IntToStr(Random(124)));
+  fBlau := TPixel.Create('Blau','Z'+IntToStr(Random(64))+'S'+IntToStr(Random(124)));
+
+  //Falls gleich
+  while fBlau.p_pos = fGrün.p_pos do
+    fBlau.p_pos := 'Z'+IntToStr(Random(64))+'S'+IntToStr(Random(124));
+
+  TPanel(FindComponent('Panel'+fGrün.p_pos)).Color := RGB(27, 126, 52);
+  TPanel(FindComponent('Panel'+fBlau.p_pos)).Color := RGB(0, 0, 255);
+end;
+
+procedure TForm1.Algo(farbe:String; pos:integer);
+begin
+  //if farbe :=
+end;
+
+procedure TForm1.timerTimer(Sender: TObject);
+var
+  i : integer;
+  n0, n1, n2, n3, n4, n5, n6, n7, n8, summe : integer;
+  grün_nr, blau_nr : integer;
+begin
+  if grün_nr <= 0 then
+  begin
+    for i := 1 to anz_led do
+    begin
+      //Grün gefunden
+      if TPanel(FindComponent('Panel'+IntToStr(i))).Color = RGB(27, 126, 52) then
+      begin
+        grün_nr := i;
+        ShowMessage(IntToStr(i));
+      end;
+
+      //Blau gefunden
+      if TPanel(FindComponent('Panel'+IntToStr(i))).Color = RGB(0, 0, 255) then
+      begin
+        blau_nr := i;
+        ShowMessage(IntToStr(i));
+      end;
+    end;
+  end;
+
+  //Array anzeigen
+ { for i := 1 to anz_led do
+  begin
+    if aSoll[i] = 0 then
+      TPanel(FindComponent('Panel'+IntToStr(i))).Color := ClBtnFace
+    else
+      TPanel(FindComponent('Panel'+IntToStr(i))).Color := clRed;
+  end; }
+  Form1.Refresh;
+end;
+
+procedure TForm1.Button1Click(Sender: TObject);
+begin
+  lStat.Color := clGreen;
+  lStat.Caption := 'Berechnungen laufen';
+  timer.Enabled := true;
+end;
+
+procedure TForm1.Button1KeyDown(Sender: TObject; var Key: Word;
+  Shift: TShiftState);
+begin
+  if Key = VK_ESCAPE then
+    ShowMessage('df');
+end;
+
+procedure TForm1.Button2Click(Sender: TObject);
+begin
+  lStat.Color := clRed;
+  lStat.Caption := 'Berechnungen gestopt';
+  timer.Enabled := false;
+end;
+
+procedure TForm1.Button3Click(Sender: TObject);
+begin
+  Clean();
+end;
+
+procedure TForm1.Button4Click(Sender: TObject);
+begin
+  //hggh
+end;
+
+procedure TForm1.Create_Matrix();
+var
+  Panel : TPanel;
+  i, j, left, top, width, height, add_left, add_top : integer;
+begin
+  left := 5;
+  top := 5;
+  width := 7;
+  height := 7;
+
+  //Zeilen
+  for i := 1 to 64 do
+  begin
+    //Spalten
+    for j := 1 to 124 do
+    begin
+      Panel := TPanel.Create(Self);
+      Panel.Parent := Self;
+      Panel.Left := left;
+      Panel.Top := top;
+      Panel.Width := width;
+      Panel.Height := height;
+      Panel.Name := 'PanelZ'+IntToStr(i)+'S'+IntToStr(j);
+      Panel.Caption := '';
+      Panel.ParentBackground := false;
+
+      left := TPanel(FindComponent('PanelZ'+IntToStr(i)+'S'+IntToStr(j))).left + 5 + width;
+
+      anz_led := anz_led+1;
+    end;
+
+    left := 5;
+    top := TPanel(FindComponent('PanelZ'+IntToStr(i)+'S'+IntToStr(1))).top + 5 + height
+  end;
+end;
+
+procedure TForm1.Edit2KeyPress(Sender: TObject; var Key: Char);
+begin
+  //nur zahlen
+  if not (Key in ['0'..'9', Char(VK_BACK)]) and not (Key = #13) then
+    Key := #0;
+
+  if Key = #13 then
+  begin
+    timer.Interval := StrToInt(Edit2.Text);
+  end;
+end;
+
+procedure TForm1.FormCreate(Sender: TObject);
+begin
+  ParentBackground := false;
+  lStat.Color := clRed;
+  Edit2.Text := IntToStr(1000);
+  timer.Interval := 1000;
+  lStat.Caption := 'Berechnungen gestopt';
+end;
+
+procedure TForm1.FormShow(Sender: TObject);
+begin
+  Create_Matrix();
+  Clean();
+end;
+
+end.
